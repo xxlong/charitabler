@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<title>ImIn</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="css/lib/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/lib/jquery.datetimepicker.css">
+	<link rel="stylesheet" type="text/css" href="css/lib/zyUpload.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<link rel="icon" href="logo.ico" type="image/x-icon" /> 
+</head>
+<body>
+	<div class="site-header">
+        <div class="site-menu navbar-inverse navbar-static-top">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <img src="image/hands.png" class="site-logo" />
+                <div class="navbar-title visible-xs one-line" id="navbarTitle">
+                    Title
+                </div>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav pull-right">
+                    <li class="user activity_new">
+                    	<a href="activity_new.html">新建</a>
+                    </li>
+                    <li class="activity_related">
+                        <a href="activity_list.html">发现</a>
+                    </li>
+                    <li class="user activity_mine">
+                        <a href="activity_mine.html">我的</a>
+                    </li>
+                    <li class="nav-divider"></li>
+                    <li class="signup">
+                    	<a href="index.html">注册</a>
+                    </li>
+                    <li class="user">
+                    	<a href="comment_mine.html">我的评论</a>
+                    </li>
+                    <li class="user">
+                    	<a href="#" id="userName"></a>
+                    </li>
+                    <li class="user">
+                    	<a id="logout">注销</a>
+                    </li>
+                    <li class="feedback">
+                        <a href="#feedbackModal" data-toggle="modal">反馈</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+	</div>
+	
+	<div class="site-body">
+		<div class="container">
+			<div class="activity-detail" style="padding:10px;margin-bottom:20px;">
+				<div class="detail-title">
+					<h1 id="title"></h1>
+					<div id="activityId" style="display:none;"></div>
+					<a class="user-link" href="activity_mine.html">
+						<img class="avatar" src="image/avatar/defaultAvatar.jpg" style="width:30px;height:30px;"/>
+						<b class="name" id="createdUserName"></b>
+					</a>
+				</div>
+				
+				<button class="btn btn-default" id="toggleEnrollActivity"><img class="ico" src="image/enroll_yellow.png"/><span>加入活动</span></button>
+				<button class="btn btn-default" id="toggleFavoriteActivity"><img class="ico" src="image/favorite_yellow.png"/><span>收藏活动</span></button>
+				<button class="btn btn-default" id="toggleLikeActivity"><img class="ico" src="image/like_yellow.png"/><span>点赞</span></button>
+				<button class="btn btn-primary hidden" id="editActivity"><img class="ico" src="image/edit_yellow.png"/><span>编辑活动</span></button>
+				<hr class="dotted_line">
+				<div>
+					<ul id="images" class="hidden-xs hidden-sm">
+					</ul>
+					<img id="defaultPhoto" class="visible-xs visible-sm" style='width:80%;margin:0 auto' alt='not found'/>
+					<!-- <img id="defaultPhoto" style='width:80%;margin:0 auto' alt='not found'/> -->
+				</div>
+				<strong>活动时间:</strong><span id="startTime" class="time-block"></span>-<span id="endTime" class="time-block"></span><br/>
+				<strong>活动地点:</strong><span id="location"></span><br/>
+				<hr class="dotted_line">
+			 	<h3><b>活动内容</b></h3>
+				<p id="content" style="min-height:150px;"></p>
+			</div>
+			<div class="relation">
+				<div class="publish" id="publishComment">
+					<span style="color:#ff4081;"><b>评论活动</b></span><span id="validNum"></span>
+					<div class="pull-right" id="makeComment" style="display:none;">
+		            	<img class="ico pointer" src="image/comment_yellow.png" title="评论活动" onclick="try{makeComment();}catch(err){};">
+		            </div>
+		            <form id="newComment" enctype="multipart/form-data">
+		            	<input text="text" class="hidden" readonly name="parentid"/>
+		            	<textarea class="form-control" rows="4" name="content" style="margin-top:10px;" maxlength="300" required></textarea>
+		            	<input type ="submit" disable class="btn btn-default" style="width:100%;" value="提交评论"/>
+		            </form>
+					
+			    </div>
+			    <div id="comments">
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="x-tmpl-mustache" id="comments_tmpl">
+	    {{#comments}}
+	    <div class="comment box" id="{{commentId}}">
+			<div class="head">
+				<div class="left">
+					<img class="avatar" src="image/avatar/defaultAvatar.jpg" />
+					<b class="name">{{createdUserName}}</b>
+				</div>
+				<div class="right">
+					<h4 class="title">回复：</h4>
+				</div>
+				<span class="createdTime">{{createdTime}}</span>
+			</div>
+			<div class="content">
+				<p>{{content}}</p>
+			</div>
+			<div class="relation">
+				<a href="activity_detail.html?id={{activityId}}">
+					<div class="left">
+						<img src="image/cover.png"/>
+					</div>
+					<div class="right">
+						<h4 class="title one-line">{{activityTitle}}</h4>
+					</div>
+				</a>
+			</div>
+		</div>
+	    {{/comments}}
+	</script>
+
+	<div class="right-bottom-fixed">
+        <img class="click go-top" title="返回顶部" src="image/backtotop.png" />
+    </div>
+	<footer class="site-footer">
+		<div style="display:inline-block;">
+			<img class="logo" src="image/cover.png">
+			<span>&copy;ImIn2016</span>
+		</div>
+	</footer>
+	<script type="text/javascript" src="js/lib/jquery-2.2.4.min.js"></script>
+	<script type="text/javascript" src="js/lib/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/lib/jquery.easing.min.js"></script>
+	<script type="text/javascript" src="js/lib/jquery.zaccordion.js"></script>
+	<script type="text/javascript" src="js/lib/mustache.js"></script>
+	<script type="text/javascript" src="js/lib/jquery-html5Validate.js"></script>
+	<script type="text/javascript" src="js/my.js"></script>
+    <script>
+    	$(function(){
+	        SetUserInfo();
+	        SetDeviceInfo();
+			$(".go-top,#navbarTitle").bind("click", function (event) {
+	            $("html, body").animate({ scrollTop: 0 }, 100);
+	        });
+	        var activityId = getQueryJson().id;
+	        $("#newComment input[name='parentid']").val(activityId);
+	        var query = {
+				parentid: activityId,
+				size: 5,
+				page: 1
+			};
+			initialise(activityId,query);
+			$("#comments").data("done",0);
+			$("#newComment").html5Validate(function() {
+				$.ajax({
+					url:"comment/new",
+					type:"post",
+					data:$("#newComment").serialize(),
+					success: function (data) {
+		        		var response = JSON.parse(data);
+		        		if(response.statusCode==18){
+							$("#error .error-message").text("尚未登录");
+							return;
+						}
+			            window.location.reload();
+			        },
+			        error: function () {
+			            $('#error').show();
+			            $('#error-message').text("一些服务器的错误");
+			        }
+				});
+			});
+	        $("#toggleLikeActivity").click(function(){
+	        	$.ajax({
+					url: 'activity/like',
+					type: "post",
+					data:'id='+activityId,
+					success: function(data){
+						var response = JSON.parse(data);
+	        			if(response.statusCode==27){//点赞成功
+	        				$("#toggleLikeActivity").removeClass('btn-default').addClass('btn-danger');
+	        				$("#toggleLikeActivity img").attr("src","image/like_white.png");
+	        				$("#toggleLikeActivity span").text("取消赞");
+	        			}else if(response.statusCode==28){//取消赞成功
+	        				$("#toggleLikeActivity").addClass('btn-default').removeClass('btn-danger');
+	        				$("#toggleLikeActivity img").attr("src","image/like_yellow.png");
+	        				$("#toggleLikeActivity span").text("点赞");
+	        			}else if(response.statusCode==18){
+	        				location.href="index.html";
+	        			}else if(response.statusCode==29){
+	        				alert("点赞失败，请重试。");
+	        			}
+					},
+					error: function(data){
+					},
+				});
+	        });
+	        $("#toggleFavoriteActivity").click(function(){
+	        	$.ajax({
+					url: 'activity/favorite',
+					type: "post",
+					data:'id='+activityId,
+					success: function(data){
+						var response = JSON.parse(data);
+	        			if(response.statusCode==30){//收藏成功
+	        				$("#toggleFavoriteActivity").removeClass('btn-default').addClass('btn-danger');
+	        				$("#toggleFavoriteActivity img").attr("src","image/favorite_white.png");
+	        				$("#toggleFavoriteActivity span").text("取消收藏");
+	        			}else if(response.statusCode==31){//取消收藏成功
+	        				$("#toggleFavoriteActivity").addClass('btn-default').removeClass('btn-danger');
+	        				$("#toggleFavoriteActivity img").attr("src","image/favorite_yellow.png");
+	        				$("#toggleFavoriteActivity span").text("收藏");
+	        			}else if(response.statusCode==18){
+	        				location.href="index.html";
+	        			}else if(response.statusCode==29){
+	        				alert("点赞失败，请重试。");
+	        			}
+					},
+					error: function(data){
+					},
+				});
+	        });
+	        $("#toggleEnrollActivity").click(function(){
+	        	$.ajax({
+					url: 'activity/enroll',
+					type: "post",
+					data:'id='+activityId,
+					success: function(data){
+						var response = JSON.parse(data);
+	        			if(response.statusCode==25){//报名成功
+	        				$("#toggleEnrollActivity").removeClass('btn-default').addClass('btn-danger');
+	        				$("#toggleEnrollActivity img").attr("src","image/enroll_white.png");
+	        				$("#toggleEnrollActivity span").text("取消报名");
+	        			}else if(response.statusCode==40){//取消报名成功
+	        				$("#toggleEnrollActivity").addClass('btn-default').removeClass('btn-danger');
+	        				$("#toggleEnrollActivity img").attr("src","image/enroll_yellow.png");
+	        				$("#toggleEnrollActivity span").text("报名");
+	        			}else if(response.statusCode==33){//超过人数限制
+	        				$("#toggleEnrollActivity").removeClass('btn-default').addClass('btn-danger');
+	        				$("#toggleEnrollActivity img").attr("src","image/enroll_white.png");
+	        				$("#toggleEnrollActivity span").text("超过人数限制");
+	        			}else if(response.statusCode==18){
+	        				location.href="index.html";
+	        			}else if(response.statusCode==26){
+	        				alert("报名失败，请重试。");
+	        			}
+					},
+					error: function(data){
+					},
+				});
+	        });
+			$("#editActivity").click(function(){
+				location.href='activity_new.html?id='+activityId;
+			});
+			//根据需要显示/隐藏返回顶部按钮
+	        $(window).scroll(function () {
+	            if ($(window).scrollTop() != 0) {
+	                $(".right-bottom-fixed").fadeIn();
+	            }
+	            else {
+	                $(".right-bottom-fixed").fadeOut();
+	            }
+	            var a = $(this).scrollTop();
+	            var b = $(this).height();
+	            var c = $(document).height();
+	            var nextPage = query.page + 1;
+	            if (c-a-b < 20 && ($("#comments").data("done") == 0)) {
+	                query.page = nextPage;
+	                refreshComments(query,true);
+	            }
+	        });
+		});//end ready
+		function initialise(activityId,query) {
+			if(activityId)
+			{
+				$.ajax({
+					url: 'activity/detail?id='+activityId,
+					type: "get",
+				//	contentType: "text/html; charset=utf-8",
+					success: function(data){
+						var response = JSON.parse(data);
+						if(response.statusCode==18){
+							$("#error .error-message").text("尚未登录");
+							return;
+						}else if(response.statusCode==21){
+							$("#error .error-message").text("获得活动信息失败");
+							return;
+						}
+						var activity_data = response.data;
+						console.log(activity_data.createdUserName,$.cookie("name"));
+						if(activity_data.createdUserName == $.cookie("name"))
+						{
+							$("#editActivity").removeClass("hidden");
+						}
+						$("#title").text(activity_data.title);
+						$("#activityId").text(activity_data.activityId);
+						$("#createdUserName").text(activity_data.createdUserName);
+						$("#likedCount").text(activity_data.likedCount);
+						$("#favoritedCount").text(activity_data.favoritedCount);
+						$("#enrolledCount").text(activity_data.enrolledCount);
+						$("#content").text(activity_data.content);
+						$("#location").text(activity_data.location);
+						$("#startTime").text(activity_data.startTime);
+						$("#endTime").text(activity_data.endTime);
+						
+						if(activity_data.isLiked){
+							$("#toggleLikeActivity").removeClass('btn-default').addClass('btn-danger');
+	        				$("#toggleLikeActivity img").attr("src","image/like_white.png");
+	        				$("#toggleLikeActivity span").text("取消赞");
+						}
+						if(activity_data.isFavorited){
+							$("#toggleFavoriteActivity").removeClass('btn-default').addClass('btn-danger');
+	        				$("#toggleFavoriteActivity img").attr("src","image/favorite_white.png");
+	        				$("#toggleFavoriteActivity span").text("取消收藏");
+						}
+						if(activity_data.isEnrolled){
+	        				$("#toggleEnrollActivity").removeClass('btn-default').addClass('btn-danger');
+	        				$("#toggleEnrollActivity img").attr("src","image/enroll_white.png");
+	        				$("#toggleEnrollActivity span").text("取消报名");
+	        			}
+						// 显示图片
+						if(activity_data.imagesList!=null)
+						{
+							if(activity_data.imagesList.length!=0)
+							{
+								$("#defaultPhoto").removeClass("hidden").attr("src",activity_data.imagesList[0]);
+							}
+							for(var i=0;i<activity_data.imagesList.length;i++)
+							{
+								$("#images").append("<li><img style='max-height: 300px;max-width:400px;' src='"+activity_data.imagesList[i]+"' alt='not found' /></li>");
+							}
+							$("#images").zAccordion({ 
+								easing: 'easeOutBounce',
+								timeout: 3000,
+								slideWidth: 450,
+								width: 700,
+								height: 300
+							});
+						}
+					},
+					error: function(){
+					},
+				});
+				refreshComments(query);
+			}
+		}
+		function refreshComments(query,add){
+			if(!add){
+				$("#comments").empty();
+			}
+			$.ajax({
+				url: "comment/toactivity",
+				type:"GET",
+				data:query,
+				success: function(data){
+					var response = JSON.parse(data);
+					console.log(response.data);
+					if (response.data.length) {
+						var tmpl= $("#comments_tmpl").html();
+						var rendered = Mustache.render(tmpl, {"comments": response.data});
+						$("#comments").append(rendered);
+					}
+					if (response.data && response.data.length<query.size)
+					{
+						$("#comments").data("done", 1);
+					}
+				},
+				error: function(){
+				}
+			});
+		}
+    </script>
+</body>
+</html>

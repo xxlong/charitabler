@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<title>ImIn</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<!-- iOS 移动设备添加主屏幕标题设置 -->
+    <meta name="apple-mobile-web-app-title" content="ImIn">
+    <!-- 禁用电话号码自动识别 -->
+    <meta name="format-detection" content="telephone=no">
+    <!-- 启用全屏模式 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- 全屏时状态颜色设置black-translucent -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <!-- 不同设备的主屏幕图标 -->
+    <link rel="shortcut icon" href="bitbug_favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="apple-touch-icon-iphone.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="apple-touch-icon-ipad.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="apple-touch-icon-retina.png">
+	<link rel="stylesheet" type="text/css" href="css/lib/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<link rel="icon" href="logo.ico" type="image/x-icon" /> 
+</head>
+<body>
+	<div class="site-body">
+		<div class="container">
+			<div class="regist-form">
+				<img class="logo" src="image/logo_banner.png"></img>
+				<div class="panel form-body">
+					<form role="form" id="signup">
+						<div class="form-group">
+							<label class="title" for="phoneNumber">手机号</label>
+							<input class="form-control" type="tel" name="phoneNumber" id="phoneNumber" placeholder="请用真实手机号注册" required/>
+						</div>
+						<div class="form-group">
+							<div class="row">
+						    	<div class="col-xs-6">
+						    		<input class="form-control" type="text" name="phoneCode" id="phoneCode" required/>
+						    	</div>
+								<div class="col-xs-6">
+						    		<button class="form-control btn btn-info" id="btnSendCode">获取验证码</button>
+						    	</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="title" for="password">密码</label>
+							<input class="form-control" type="password" name="password" id="password" placeholder="请输入密码" data-min="6" data-max="20" required/>
+						</div>
+						<div class="form-group">
+							<label class="title" for="confirmPassword">确认密码</label>
+							<input class="form-control" type="password" name="confirmPassword" id="confirmPassword" placeholder="请输入密码" data-min="6" data-max="20" required/>
+						</div>
+						<div class="form-group">
+							<label class="title" for="name">姓名</label>
+							<input class="form-control" type="text" name="name" id="name" placeholder="请输入姓名" maxlength="20" required/>
+						</div>
+						<div class="form-group">
+							<label class="title" for="sex">性别</label>
+							<label class="checkbox-inline"><input type="radio" name="sex" value="man" checked="true" required/>男</label>
+							<label class="checkbox-inline"><input type="radio" name="sex" value="woman"/ required>女</label>
+						</div>
+						<div class="form-group has-error" id="error">
+							<label class="control-label error-message" ></label>
+						</div>
+						<div class="form-group">
+							<div class="text-center">
+								<input type="submit" disabled class="btn btn-primary" value="注册"/>
+								<a href="activity_list.html" class="pull-left" style="padding:6px 12px;">暂不登陆</a>
+								<a href="login.html" class="pull-right" style="padding:6px 12px;">直接登陆</a>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<footer class="site-footer">
+		<div style="display:inline-block;">
+			<img class="logo" src="image/cover.png">
+			<span>&copy;ImIn2016</span>
+		</div>
+	</footer>
+	<script type="text/javascript" src="js/lib/jquery-2.2.4.min.js"></script>
+	<!--script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script-->
+	<script type="text/javascript" src="js/lib/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/lib/jquery-html5Validate.js"></script>
+	<script type="text/javascript" src="js/my.js"></script>
+	<script type="text/javascript" src="js/sms.js"></script>
+    <script>
+	$(document).ready(function(){
+		//验证表单
+		$("#signup").html5Validate(function() {
+			var information=$('form').serializeArray();
+			console.log(information);
+			$.post('user/signup',information,function(data){
+				$.clearcookie();
+				var response = JSON.parse(data);
+				console.log(response.statusCode);
+				if(response.statusCode==14){
+					$("#error .error-message").text("注册失败");
+					return;
+				}else if(response.statusCode==16){
+					$("#error .error-message").text("用户名已注册");
+					return;
+				}else if(response.statusCode==39){
+					$("#error .error-message").text("手机号已注册");
+					return;
+				}
+				var expire=7;
+				$.cookie('userId',response.data.userId+';path=/',expire);
+				$.cookie('name',response.data.name+';path=/',expire);
+				$.cookie('avatar',response.data.avatar+';path=/',expire);
+				$.cookie('sex',response.data.sex+';path=/',expire);
+				$.cookie('phoneNumber',response.data.phoneNumber+';path=/',expire);
+				$.cookie('password',response.data.password+';path=/',expire);
+				location.href="activity_list.html";
+			}).error(function(data) {
+				
+			});
+		}, {
+			validate: function() {
+		        // 下面这些就是额外的一些特殊验证
+		        if ($("#password").val() !== $("#confirmPassword").val()) {
+		            $("#confirmPassword").testRemind("前后密码不一致");
+		            return false;  
+		        }
+		       return true;  
+		    }
+		});
+		$("#btnSendCode").click(function(e){
+			e.preventDefault();
+			e.stopPropagation();
+			if ($.html5Validate.isAllpass($("#phoneNumber"))) {
+		       sendMessage();
+		    }else{
+		    	$("#phoneNumber").testRemind("请确保手机号正确");
+		    }
+		});
+		if(IsLogIn()){
+			location.href="activity_list.html";
+		}
+	});//end ready
+    </script>
+</body>
+</html>

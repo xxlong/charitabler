@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<title>ImIn</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="css/lib/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/lib/jquery.datetimepicker.css">
+	<link rel="stylesheet" type="text/css" href="css/lib/zyUpload.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<link rel="icon" href="logo.ico" type="image/x-icon" /> 
+</head>
+<body>
+	<div class="site-header">
+        <div class="site-menu navbar-inverse navbar-static-top">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <img src="image/hands.png" class="site-logo" />
+                <div class="navbar-title visible-xs one-line" id="navbarTitle">
+                    Title
+                </div>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav pull-right">
+                    <li class="user activity_new">
+                    	<a href="activity_new.html">新建</a>
+                    </li>
+                    <li class="activity_related">
+                        <a href="activity_list.html">发现</a>
+                    </li>
+                    <li class="user activity_mine">
+                        <a href="activity_mine.html">我的</a>
+                    </li>
+                    <li class="nav-divider"></li>
+                    <li class="signup">
+                    	<a href="index.html">注册</a>
+                    </li>
+                    <li class="user">
+                    	<a href="comment_mine.html" class="highlight">我的评论</a>
+                    </li>
+                    <li class="user">
+                    	<a href="#" id="userName"></a>
+                    </li>
+                    <li class="user">
+                    	<a id="logout">注销</a>
+                    </li>
+                    <li class="feedback">
+                        <a href="#feedbackModal" data-toggle="modal">反馈</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+	</div>
+	
+	<div class="site-body">
+		<div class="container">
+		    <div id="comments">
+			</div>
+		</div>
+	</div>
+	<script type="x-tmpl-mustache" id="comments_tmpl">
+	    {{#comments}}
+	    <div class="comment box" id="{{commentId}}">
+			<div class="head">
+				<div class="left">
+					<img class="avatar" src="image/avatar/defaultAvatar.jpg" />
+					<b class="name">{{createdUserName}}</b>
+				</div>
+				<div class="right">
+					<h4 class="title">回复：</h4>
+				</div>
+				<span class="createdTime">{{createdTime}}</span>
+			</div>
+			<div class="content">
+				<p>{{content}}</p>
+			</div>
+			<div class="relation">
+				<a href="activity_detail.html?id={{activityId}}">
+					<div class="left">
+						<img src="image/cover.png"/>
+					</div>
+					<div class="right">
+						<h4 class="title one-line">{{activityTitle}}</h4>
+					</div>
+				</a>
+			</div>
+		</div>
+	    {{/comments}}
+	</script>
+
+	<div class="right-bottom-fixed">
+        <img class="click go-top" title="返回顶部" src="image/backtotop.png" />
+    </div>
+	<footer class="site-footer">
+		<div style="display:inline-block;">
+			<img class="logo" src="image/cover.png">
+			<span>&copy;ImIn2016</span>
+		</div>
+	</footer>
+	<script type="text/javascript" src="js/lib/jquery-2.2.4.min.js"></script>
+	<script type="text/javascript" src="js/lib/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/lib/mustache.js"></script>
+	<script type="text/javascript" src="js/my.js"></script>
+    <script>
+    	$(function(){
+	        SetUserInfo();
+	        SetDeviceInfo();
+			$(".go-top,#navbarTitle").bind("click", function (event) {
+	            $("html, body").animate({ scrollTop: 0 }, 100);
+	        });
+	        var userId = getQueryJson().id;
+	        var query = {
+				userid: userId,
+				size: 5,
+				page: 1
+			};
+			refreshComments(query);
+			$("#comments").data("done",0);
+			//根据需要显示/隐藏返回顶部按钮
+	        $(window).scroll(function () {
+	            if ($(window).scrollTop() != 0) {
+	                $(".right-bottom-fixed").fadeIn();
+	            }
+	            else {
+	                $(".right-bottom-fixed").fadeOut();
+	            }
+	            var a = $(this).scrollTop();
+	            var b = $(this).height();
+	            var c = $(document).height();
+	            var nextPage = query.page + 1;
+	            if (c-a-b < 20 && ($("#comments").data("done") == 0)) {
+	                query.page = nextPage;
+	                refreshComments(query,true);
+	            }
+	        });
+		});//end ready
+		function refreshComments(query,add){
+			if(!add){
+				$("#comments").empty();
+			}
+			$.ajax({
+				url: "comment/touser",
+				type:"GET",
+				data:query,
+				success: function(data){
+					var response = JSON.parse(data);
+					console.log(response.data);
+					if (response.data.length) {
+						var tmpl= $("#comments_tmpl").html();
+						var rendered = Mustache.render(tmpl, {"comments": response.data});
+						$("#comments").append(rendered);
+					}
+					if (response.data && response.data.length<query.size)
+					{
+						$("#comments").data("done", 1);
+					}
+				},
+				error: function(){
+				}
+			});
+		}
+    </script>
+</body>
+</html>

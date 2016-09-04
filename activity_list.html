@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<title>ImIn</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<link rel="stylesheet" type="text/css" href="css/lib/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/lib/jquery.datetimepicker.css">
+	<link rel="stylesheet" type="text/css" href="css/lib/zyUpload.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<link rel="icon" href="logo.ico" type="image/x-icon" /> 
+</head>
+<body>
+	<div class="site-header">
+        <div class="site-menu navbar-inverse navbar-static-top">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <img src="image/hands.png" class="site-logo" />
+                <div class="navbar-title visible-xs one-line" id="navbarTitle">
+                    Title
+                </div>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav pull-right">
+                    <li class="user activity_new">
+                    	<a href="activity_new.html">新建</a>
+                    </li>
+                    <li class="activity_related">
+                        <a href="activity_list.html" class="highlight">发现</a>
+                    </li>
+                    <li class="user activity_mine">
+                        <a href="activity_mine.html">我的</a>
+                    </li>
+                    <li class="nav-divider"></li>
+                    <li class="signup">
+                    	<a href="index.html">注册</a>
+                    </li>
+                    <li class="user">
+                    	<a href="comment_mine.html">我的评论</a>
+                    </li>
+                    <li class="user">
+                    	<a href="#" id="userName"></a>
+                    </li>
+                    <li class="user">
+                    	<a id="logout">注销</a>
+                    </li>
+                    <li class="feedback">
+                        <a href="#feedbackModal" data-toggle="modal">反馈</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+	</div>
+	
+	<div class="site-body">
+		<div class="container">
+			<div class="filter-sort row nopadding">
+				<div class="col-xs-4">
+					<button class="btn btn-default sort_by" id="createdTime" type="button">
+						新鲜度
+					</button>
+				</div>
+				<div class="col-xs-4">
+					<button class="btn btn-default sort_by" id="likedCount" type="button">
+						关注度
+					</button>
+				</div>
+				<div class="col-xs-4">
+					<button class="btn btn-default sort_by" id="enrollCount" type="button">
+						参与度
+					</button>
+				</div>
+			</div>
+			<div id="activities">
+				
+			</div>
+		</div>
+	</div>
+	<footer class="site-footer">
+		<div style="display:inline-block;">
+			<img class="logo" src="image/cover.png">
+			<span>&copy;ImIn2016</span>
+		</div>
+	</footer>
+	<div class="right-bottom-fixed">
+        <img class="click go-top" title="返回顶部" src="image/backtotop.png" />
+    </div>
+	<script src="js/lib/jquery-3.0.0.min.js"></script>
+	<script src="js/lib/bootstrap.min.js"></script>
+	<script src="js/lib/mustache.js"></script>
+	<script src="js/my.js"></script>
+    <script type="x-tmpl-mustache" id="activity_tmpl">
+		{{#activities}}
+		<div class="activity box" id="{{activityId}}">
+			<div class="head">
+				<div class="left">
+					<a href="activity_mine.html?id={{activityId}}">
+						<img class="avatar" src="image/avatar/defaultAvatar.jpg" />
+						<b class="name">Terrance</b>
+					</a>
+				</div>
+				<div class="right">
+					<a href="activity_detail.html?id={{activityId}}">
+						<h5 class="title one-line">{{title}}</h5>
+					</a>
+				</div>
+				<span class="createdTime">{{createdTime}}</span>
+			</div>
+			<div class="present">
+				<div class="left">
+					<a href="activity_detail.html?id={{activityId}}">
+						<img src="{{cover}}" class="hidden" />
+					</a>
+				</div>
+				<div class="right">
+					<a href="activity_detail.html?id={{activityId}}">
+						<div class="property">
+							<div class="starttime one-line">活动时间：{{startTime}}</div>
+							<div class="location one-line">活动地点：{{location}}</div>
+						</div>
+						<div class="abstract">
+							<p>{{content}}</p>
+						</div>
+					</a>
+					
+					<div class="bar row">
+						<div class="bar_item col-xs-3 nopadding">
+							<img src="image/like_yellow.png" class="ico"/>
+							<b class="likeCount">{{likedCount}}</b>
+						</div>
+						<div class="bar_item col-xs-3 nopadding">
+							<img src="image/favorite_yellow.png" class="ico"/>
+							<b class="favoriteCount">{{favoritedCount}}</b>
+						</div>
+						<div class="bar_item col-xs-3 nopadding">
+							<a href="activity_detail.html?id={{activityId}}#publishComment">
+								<img src="image/comment_yellow.png" class="ico"/>
+								<b class="commentCount">{{commentCount}}</b>
+							</a>
+						</div>
+						<div class="bar_item col-xs-3 nopadding">
+							<img src="image/enroll_yellow.png" class="ico"/>
+							<b class="enrolledCount">{{enrolledCount}}</b>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		{{/activities}}
+	</script>
+	<script>
+		$(document).ready(function(){
+			
+			var query = {
+				sortby: null,
+				size: 5,
+				page: 1
+			};
+			window.testActivity={
+				activityId:1,
+				createdUserId:2,
+				title:"爱护环境，从我做起！爱护环境，从我做起！爱护环境，从我做起!",
+				cover:"image/cover.png",
+				createdTime:"2016-6-25 9:00",
+				startTime:"2016-6-26 14:00",
+				endTime:"2016-6-27 14:00",
+				location:"深圳市南山区深南大道9998号万利达科技大厦",
+				likedCount:32,
+				favoritedCount:21,
+				enrolledCount:6
+			};
+			SetUserInfo();
+			SetDeviceInfo();
+			
+			//$("li.activity:first>a").click();
+			$('.filter-sort .sort_by').click(function(){
+				var key=$(this).attr('id');
+				current_sort=$(this);
+				location.hash=key;
+				query.sortby=key;
+				query.page=1;
+				$("#activities").data("done",0);
+				$("#navbarTitle").text($(this).text());
+				$('.filter-sort .sort_by').each(function() {
+					if($(this).attr('id') != current_sort.attr('id')) {
+						$(this).removeClass("btn-primary").addClass("btn-default");
+					}else{
+						$(this).removeClass("btn-default").addClass("btn-primary");
+					}
+				});
+				refreshActivities(query);
+			});
+			
+			if(location.hash){
+				$(location.hash).click();
+			}else{
+				$('.filter-sort .btn:first').click();
+			}
+			//根据需要显示/隐藏返回顶部按钮
+	        $(window).scroll(function () {
+	            if ($(window).scrollTop() != 0) {
+	                $(".right-bottom-fixed").fadeIn();
+	            }
+	            else {
+	                $(".right-bottom-fixed").fadeOut();
+	            }
+	            var a = $(this).scrollTop();
+	            var b = $(this).height();
+	            var c = $(document).height();
+	            var nextPage = query.page + 1;
+	            if (c-a-b < 20 && ($("#activities").data("done")==0)) {
+	                query.page = nextPage;
+	                refreshActivities(query,true);
+	            }
+	        });
+			$(".go-top,#navbarTitle").bind("click", function (event) {
+	            $("html, body").animate({ scrollTop: 0 }, 100);
+	        });
+		});
+		function refreshActivities(query,add){
+			if(!add){
+				$("#activities").empty();
+			}
+			$.ajax({
+				url: "activity/all",
+				type:"GET",
+				data: query,
+				success: function(data){
+					var response = JSON.parse(data);
+					if(response.statusCode==20){
+						if (response.data.length) {
+							var tmpl= $("#activity_tmpl").html();
+							for (var i = response.data.length - 1; i >= 0; i--) {
+								if(response.data[i].images == null || response.data[i].images.length == 0)
+							    {
+							        response.data[i].cover = "image/cover.png";
+							    }
+							};
+							var rendered = Mustache.render(tmpl, {"activities": response.data});
+							$("#activities").append(rendered);
+						}
+						if (response.data && response.data.length<query.size)
+						{
+							$("#activities").data("done", 1);
+						}
+					}else if(response.statusCode==37){
+						alert("没有活动了。");
+					}
+				},error: function(){
+				}
+			});
+			/*
+			var tmpl= $("#activity_tmpl").html();
+			for(var i=0;i<query.size;i++){
+				var rendered = Mustache.render(tmpl, {"activities": testActivity});
+				$("#activities").append(rendered);
+			}*/
+		}
+	</script>
+</body>
+</html>

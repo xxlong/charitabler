@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<title>ImIn</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<link rel="stylesheet" type="text/css" href="css/lib/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/lib/jquery.datetimepicker.css">
+	<link rel="stylesheet" type="text/css" href="css/lib/zyUpload.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<link rel="icon" href="logo.ico" type="image/x-icon" /> 
+</head>
+<body>
+	<div class="site-header">
+        <div class="site-menu navbar-inverse navbar-static-top">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <img src="image/hands.png" class="site-logo" />
+                <div class="navbar-title visible-xs one-line" id="navbarTitle">
+                    新建活动
+                </div>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav pull-right">
+                    <li class="user activity_new">
+                    	<a href="activity_new.html" class="highlight">新建</a>
+                    </li>
+                    <li class="activity_related">
+                        <a href="activity_list.html">发现</a>
+                    </li>
+                    <li class="user activity_mine">
+                        <a href="activity_mine.html">我的</a>
+                    </li>
+                    <li class="nav-divider"></li>
+                    <li class="signup">
+                    	<a href="index.html">注册</a>
+                    </li>
+                    <li class="user">
+                    	<a href="comment_mine.html">我的评论</a>
+                    </li>
+                    <li class="user">
+                    	<a href="#"   id="userName"></a>
+                    </li>
+                    <li class="user">
+                    	<a id="logout">注销</a>
+                    </li>
+                    <li class="feedback">
+                        <a href="mailto:766013218@qq.com?subject=来自ImIn的用户反馈">反馈</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+	</div>
+	
+	<div class="site-body">
+		<div class="container">
+			<form role="form" class="form-horizontal" id="newActivity" enctype="multipart/form-data">
+				<input class="hidden" name="activityId"/>
+				<div class="form-group row nopadding">
+					<label for="title" class="col-sm-2 control-label">活动名称</label>
+					<div class="col-sm-10">
+						<input type="text" class="form-control" name="title" maxlength="30" required>
+					</div>
+				</div>
+				<div class="form-group row nopadding">
+					<label for="userCountLimit" class="col-sm-2 control-label">人数上限</label>
+					<div class="col-sm-10">
+						<input type="number" class="form-control" name="userCountLimit" required>
+					</div>
+				</div>
+				<div class="form-group row nopadding">
+					<label class="col-sm-2 control-label">活动时间</label>
+					<div class="col-sm-10">
+						<div class="row nopadding">
+							<div class="col-sm-5 col-xs-6 nopadding">
+								<input class="form-control timepicker" type="text" name="startTime" placeholder="begin" required/>
+							</div>
+							<div class="col-sm-2 hidden-xs text-center">
+								<label class="control-label">至</label>
+							</div>
+							<div class="col-sm-5 col-xs-6 nopadding">
+								<input class="form-control timepicker" type="text" name="endTime" placeholder="end" required/>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="form-group row nopadding">
+					<label for="location" class="col-sm-2 control-label">活动地点</label>
+					<div class="col-sm-10">
+						<input type="text" class="form-control" name="location" maxlength="30" required>
+					</div>
+				</div>
+				<div class="form-group row nopadding">
+					<label for="location" class="col-sm-2 control-label">活动内容</label>
+					<div class="col-sm-10">
+						<textarea class="form-control" name="content" rows="5"  maxlength="300" required></textarea>
+					</div>
+				</div>
+				<div class="form-group row nopadding">
+					<label for="images" class="col-sm-2 control-label">活动图片</label>
+	<!-- 			<input type="file" name="images" multiple> -->
+					<div class="col-sm-10">
+						<div id="uploadImages" class="upload"></div>
+				        <strong id="uploadSuccess" class="hidden">上传成功文件地址：</strong>
+				        <div id="uploadSuccessInf" class="hidden upload_inf"></div>
+				        <strong id="uploadFailure" class="hidden">上传失败文件名称：</strong>
+				        <div id="uploadFailureInf" class="hidden upload_inf"></div>
+					</div>
+				</div>
+				<div class="form-group has-error row nopadding" id="error">
+					<label class="control-label error-message" ></label>
+				</div>
+				<div class="form-group row nopadding">
+					<div class="text-center">
+						<input type="submit" disabled class="btn btn-danger" value="提交"/>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<footer class="site-footer">
+		<div style="display:inline-block;">
+			<img class="logo" src="image/cover.png">
+			<span>&copy;ImIn2016</span>
+		</div>
+	</footer>
+	<script type="text/javascript" src="js/lib/jquery-2.2.4.min.js"></script>
+	<script type="text/javascript" src="js/lib/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/lib/jquery.datetimepicker.js"></script>
+	<script type="text/javascript" src="js/lib/zyFile.js"></script>
+	<script type="text/javascript" src="js/lib/zyUpload.js"></script>
+	<script type="text/javascript" src="js/lib/jquery.easing.min.js"></script>
+	<script type="text/javascript" src="js/lib/jquery.zaccordion.js"></script>
+	<script type="text/javascript" src="js/lib/jquery-html5Validate.js"></script>
+	<script type="text/javascript" src="js/my.js"></script>
+    <script>
+    	$(function(){
+			var SaveEvent=addActivity;
+			$(".xdsoft_datetimepicker").remove();
+	    	$('.timepicker').datetimepicker({
+		        //mask:'9999/19/39 29:59'
+		    });
+		    SetUserInfo();
+		    SetDeviceInfo();
+		    initialise(getQueryJson().id);
+		    // 初始化插件
+			$("#uploadImages").zyUpload({url : "activity/upload"});
+			
+			$("#newActivity").html5Validate(function() {
+				SaveEvent();
+			}, {
+				validate: function() {
+			        // 下面这些就是额外的一些特殊验证
+			        var startTime=new Date($("input[name='startTime']").val());
+					var finishTime=new Date($("input[name='finishTime']").val());
+					if (startTime > finishTime) {
+						$("input[name='finishTime']").testRemind("活动结束时间应大于活动开始时间！");
+						return false;
+					}
+			       return true;  
+			    }	
+			});
+		});//end ready
+		function addActivity()
+		{
+			$.ajax({
+				url: 'activity/new',
+				type: "post",
+	        	data: $('form').serialize(), 
+	        	success: function (data) {
+	        		var response = JSON.parse(data);
+	        		if(response.statusCode==18){
+						$("#error .error-message").text("尚未登录");
+						return;
+					}
+		            window.location="activity_detail.html?id="+response.data;
+		        },
+		        error: function () {
+		            $('#error').show();
+		            $('#error-message').text("一些服务器的错误");
+		        }
+		    });
+		}
+		function updateActivity()
+		{
+			var activityId = $("input[name='activityId']").val();
+			$.ajax({
+				url: 'activity/update?id='+activityId,
+				type: "put",
+				data: $('form').serialize(),
+				success: function() {
+					document.location="activity_detail.html?id="+activityId;
+				},
+				error: function() {
+				},
+			});
+		}
+		function initialise(id) {
+			if(id)
+			{
+				$.ajax({
+					url: 'activity/detail',
+					type: "get",
+					data: {"id": id},
+					success: function(data){
+						var response = JSON.parse(data);
+						if(response.statusCode==18){
+							$("#error .error-message").text("尚未登录");
+							return;
+						}else if(response.statusCode==21){
+							$("#error .error-message").text("获得活动信息失败");
+							return;
+						}
+						var activity_data = response.data;
+						$("input[name='title']").val(activity_data.title);
+						$("input[name='activityId']").val(activity_data.id);
+						$("input[name='userCountLimit']").val(activity_data.userCountLimit);
+						$("textarea[name='content']").val(activity_data.content);
+						$("input[name='location']").val(activity_data.location);
+
+						$("input[name='startTime']").val(activity_data.startTime);
+						$("input[name='endTime']").val(activity_data.endTime);
+						
+						
+						// 显示图片视频
+						if(activity_data.Photos!=null)
+						{
+							for(var i=0;i<activity_data.Photos.length;i++)
+							{
+								$("#photos").append("<li><img style='max-height: 300px;max-width:400px;' src='"+activity_data.Photos[i]+"' alt='not found' /></li>");
+							}
+							$("#photos").zAccordion({ 
+								easing: 'easeOutBounce',
+								timeout: 3000,
+								slideWidth: 450,
+								width: 700,
+								height: 300
+							});
+						}
+						$("input[name='name']").focus();
+					},
+					error: function(data){
+					},
+				});
+				SaveEvent=updateActivity;
+			}
+		}
+    </script>
+</body>
+</html>
